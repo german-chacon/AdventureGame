@@ -95,7 +95,6 @@ while (gameRunning) {
     console.log("3: Check inventory");
     console.log("4: Quit game");
   } else if (currentLocation === "forest") {
-
     console.log("\n=== FOREST ===");
     console.log("A dark forest surrounds you. You hear strange noises...");
 
@@ -119,74 +118,101 @@ while (gameRunning) {
     console.log("\nYou return to the safety of the village.");
   }
 
-  // Get user input about the next choice
-  let userInput = parseInt(
-    readlineSync.question("Enter a number to continue ")
-  );
+  let validUserInput = false;
+  while (!validUserInput) {
+    try {
+      // Get user input about the next choice
+      let userInput = readlineSync.question("Enter a number to continue ");
 
-    // Handle choices based on location
-  if (currentLocation === "village") {
-    if (userInput === 1) {
-      currentLocation = "blacksmith";
-      console.log("\nYou enter the blacksmith's shop.");
-    } else if (userInput === 2) {
-      console.log("\nMerchants call out their wares.");
-    } else if (userInput === 3) {
-      currentLocation = "forest";
-      console.log(
-        "\nA dark path leads into the forest. Strange noises echo from within."
-      );
-    } else if (userInput === 4) {
-      // Show status
-      console.log("\n=== " + playerName + "'s Status ===");
-      console.log("❤️  Health: " + playerHealth);
-      console.log("💰 Gold: " + gold);
-      console.log("📍 Location: " + currentLocation);
-    } else if (userInput === 5) {
-      for (let i = 0; i < 3; i++) {
-        console.log("Checking item slot " + i + "...");
-        if (slot === 1 && hasWeapon) {
-          console.log("Found: Sword");
-        } else if (slot === 2 && hasPotion) {
-          console.log("Found: Health Potion");
-        } else if (slot === 3 && hasArmor) {
-          console.log("Found: Shield");
+      if (userInput.trim() === "") {
+        console.log("Empty input. Try again!");
+      }
+
+      let userInputNumber = parseInt(userInput);
+      if (isNaN(userInputNumber)) {
+        console.log("This is not a number. Please try again");
+      }
+      // Handle choices based on location
+      if (currentLocation === "village") {
+        if (userInputNumber < 1 || userInputNumber > 6) {
+          throw "Please enter a number between 1 and 6.";
+        }
+        validUserInput = true;
+        if (userInputNumber === 1) {
+          currentLocation = "blacksmith";
+          console.log("\nYou enter the blacksmith's shop.");
+        } else if (userInputNumber === 2) {
+          console.log("\nMerchants call out their wares.");
+        } else if (userInputNumber === 3) {
+          currentLocation = "forest";
+          console.log(
+            "\nA dark path leads into the forest. Strange noises echo from within."
+          );
+        } else if (userInputNumber === 4) {
+          // Show status
+          console.log("\n=== " + playerName + "'s Status ===");
+          console.log("❤️  Health: " + playerHealth);
+          console.log("💰 Gold: " + gold);
+          console.log("📍 Location: " + currentLocation);
+        } else if (userInputNumber === 5) {
+          for (let slot = 0; slot < 3; slot++) {
+            console.log("Checking item slot " + slot + "...");
+            if (slot === 1 && hasWeapon) {
+              console.log("Found: Sword");
+            } else if (slot === 2 && hasPotion) {
+              console.log("Found: Health Potion");
+            } else if (slot === 3 && hasArmor) {
+              console.log("Found: Shield");
+            } else {
+              console.log("Empty slot");
+            }
+          }
+        } else if (userInputNumber === 6) {
+          console.log("\nGoodbye, brave adventurer!");
+          gameRunning = false;
+        }
+      } else if (
+        currentLocation === "blacksmith" ||
+        currentLocation === "market"
+      ) {
+        if (userInputNumber < 1 || userInputNumber > 4) {
+          throw "Please enter a number between 1 and 4.";
+        }
+        validUserInput = true;
+        if (userInputNumber === 1) {
+          currentLocation = "village";
+          console.log("\nYou return to the village center.");
+        } else if (userInputNumber === 2) {
+          // Show status
+          console.log("\n=== " + playerName + "'s Status ===");
+          console.log("❤️  Health: " + playerHealth);
+          console.log("💰 Gold: " + gold);
+          console.log("📍 Location: " + currentLocation);
+        } else if (userInputNumber === 3) {
+          for (let slot = 0; slot < 3; slot++) {
+            console.log("Checking item slot " + slot + "...");
+            if (slot === 1 && hasWeapon) {
+              console.log("Found: Sword");
+            } else if (slot === 2 && hasPotion) {
+              console.log("Found: Health Potion");
+            } else if (slot === 3 && hasArmor) {
+              console.log("Found: Shield");
+            } else {
+              console.log("Empty slot");
+            }
+          }
+        } else if (userInputNumber === 4) {
+          console.log("\nGoodbye, brave adventurer!");
+          gameRunning = false;
         } else {
-          console.log("Empty slot");
+          console.log(
+            "\nInvalid choice! Please enter a number between 1 and 3."
+          );
         }
       }
-    } else if (userInput === 6) {
-      console.log("\nGoodbye, brave adventurer!");
-      gameRunning = false;
-    } else {
-      console.log("\nInvalid choice! Please enter a number between 1 and 6.");
-    }
-  } else if (currentLocation === "blacksmith" || currentLocation === "market") {
-    if (userInput === 1) {
-      currentLocation = "village";
-      console.log("\nYou return to the village center.");
-    } else if (userInput === 2) {
-      // Show status
-      console.log("\n=== " + playerName + "'s Status ===");
-      console.log("❤️  Health: " + playerHealth);
-      console.log("💰 Gold: " + gold);
-      console.log("📍 Location: " + currentLocation);
-    } else if (userInput === 3) {
-      console.log("Checking item slot " + i + "...");
-      if (slot === 1 && hasWeapon) {
-        console.log("Found: Sword");
-      } else if (slot === 2 && hasPotion) {
-        console.log("Found: Health Potion");
-      } else if (slot === 3 && hasArmor) {
-        console.log("Found: Shield");
-      } else {
-        console.log("Empty slot");
-      }
-    } else if (userInput === 4) {
-      console.log("\nGoodbye, brave adventurer!");
-      gameRunning = false;
-    } else {
-      console.log("\nInvalid choice! Please enter a number between 1 and 3.");
+    } catch (error) {
+      console.log("\nError: " + error);
+      console.log("Please try again!");
     }
   }
 
