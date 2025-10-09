@@ -48,9 +48,6 @@ console.log(`Starting location: ${currentLocation}`);
 console.log(`First time visit: ${firstVisit}\n`);
 
 let gameRunning = true; // Game is running
-let hasWeapon = false;
-let hasPotion = false;
-let hasArmor = false;
 
 /**
  * Shows the player's current stats
@@ -66,6 +63,7 @@ function showStatus() {
   console.log("❤️  Health: " + playerHealth);
   console.log("💰 Gold: " + playerGold);
   console.log("📍 Location: " + currentLocation);
+  checkInventory();
 }
 
 /**
@@ -126,14 +124,20 @@ function showLocation() {
  */
 function checkInventory() {
   console.log("\n=== INVENTORY ===");
-  if (!hasWeapon && !hasPotion && !hasArmor) {
+  if (inventory.length === 0) {
     console.log("Your inventory is empty!");
     return;
   }
 
-  if (hasWeapon) console.log("- Sword");
-  if (hasPotion) console.log("- Health Potion");
-  if (hasArmor) console.log("- Shield");
+  if (inventory.includes("sword")) {
+    console.log("- Sword");
+  }
+  if (inventory.includes("potion")) {
+    console.log("- Potion");
+  }
+  if (inventory.includes("armor")) {
+    console.log("- Armor");
+  }
 }
 
 /**
@@ -201,7 +205,7 @@ function move(choiceNum) {
  * @returns {boolean} True if combat was successful, false if retreat
  */
 function handleCombat() {
-  if (hasWeapon) {
+  if (inventory.includes("sword")) {
     console.log("You have a sword! You attack!");
     console.log("Victory! You found 10 gold!");
     playerGold += 10;
@@ -244,10 +248,11 @@ function updateHealth(amount) {
  * @returns {boolean} true if item was used successfully, false if not
  */
 function useItem() {
-  if (hasPotion) {
+  if (inventory.includes("potion")) {
     console.log("You drink the healing potion.");
     updateHealth(30);
-    hasPotion = false;
+    let potionIndex = inventory.indexOf("potion");
+    inventory.splice(potionIndex, 1);
     return true;
   }
   console.log("You don't have any usable items!");
@@ -263,10 +268,12 @@ function useItem() {
  * Handles purchasing items at the blacksmith
  */
 function buyFromBlacksmith() {
-  if (playerGold >= 10) {
+  if (inventory.includes("sword")) {
+    console.log("\nBlacksmith: 'You already have a sword!'");
+  } else if (playerGold >= 10) {
     console.log("\nBlacksmith: 'A fine blade for a brave adventurer!'");
     playerGold -= 10;
-    hasWeapon = true;
+    inventory.push("sword");
     console.log("You bought a sword for 10 gold!");
     console.log("Gold remaining: " + playerGold);
   } else {
@@ -278,10 +285,12 @@ function buyFromBlacksmith() {
  * Handles purchasing items at the market
  */
 function buyFromMarket() {
-  if (playerGold >= 5) {
+  if (inventory.includes("potion")) {
+    console.log("Merchant: 'You already have a potion!'");
+  } else if (playerGold >= 5) {
     console.log("\nMerchant: 'This potion will heal your wounds!'");
     playerGold -= 5;
-    hasPotion = true;
+    inventory.push("potion");
     console.log("You bought a health potion for 5 gold!");
     console.log("Gold remaining: " + playerGold);
   } else {
