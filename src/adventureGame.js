@@ -50,7 +50,7 @@ console.log(`First time visit: ${firstVisit}\n`);
 
 let gameRunning = true; // Game is running
 let hasWeapon = false;
-let hasPotion = true;
+let hasPotion = false;
 let hasArmor = false;
 
 /**
@@ -99,28 +99,6 @@ function showLocation() {
     console.log("2: Check status");
     console.log("3: Check inventory");
     console.log("4: Quit game");
-  } else if (currentLocation === "forest") {
-    console.log("\n=== FOREST ===");
-    console.log("A dark forest surrounds you. You hear strange noises...");
-
-    // Simple battle when entering forest
-    let inBattle = true;
-    let monsterHealth = 3;
-
-    console.log("Battle started!");
-
-    while (inBattle) {
-      console.log("Monster health: " + monsterHealth);
-      console.log("You attack!");
-      monsterHealth--;
-
-      if (monsterHealth <= 0) {
-        console.log("Monster defeated!");
-        inBattle = false;
-      }
-    }
-    currentLocation = "village"; // Return to village after battle
-    console.log("\nYou return to the safety of the village.");
   }
 }
 
@@ -157,10 +135,62 @@ function move(choiceNum) {
   return validMove;
 }
 
+/**
+ * Handles combat encounters
+ * @returns {boolean} True if combat was successful, false if retreat
+ */
+function handleCombat() {
+  if (hasWeapon) {
+    console.log("You have a sword! You attack!");
+    console.log("Victory! You found 10 gold!");
+    playerGold += 10;
+    return true;
+  } else {
+    console.log("Without a weapon, you must retreat!");
+    updateHealth(-20);
+    return false;
+  }
+}
+
+/**
+ * Updates player health within valid range
+ * @param {number} amount Amount to change health by
+ * @returns {number} The new health value
+ */
+function updateHealth(amount) {
+  playerHealth += amount;
+
+  if (playerHealth > 100) {
+    playerHealth = 100;
+    console.log("You're at full health!");
+  }
+  if (playerHealth < 0) {
+    playerHealth = 0;
+    console.log("You're gravely wounded!");
+  }
+
+  console.log("Health is now: " + playerHealth);
+  return playerHealth;
+}
+
+/**
+ * Checks and displays inventory
+ */
+function checkInventory() {
+  console.log("\n=== INVENTORY ===");
+  if (!hasWeapon && !hasPotion && !hasArmor) {
+    console.log("Your inventory is empty!");
+    return;
+  }
+
+  if (hasWeapon) console.log("- Sword");
+  if (hasPotion) console.log("- Health Potion");
+  if (hasArmor) console.log("- Shield");
+}
+
 while (gameRunning) {
   // Check and display location
   showLocation();
-  showStatus();
 
   let validUserInput = false;
   while (!validUserInput) {
@@ -185,6 +215,11 @@ while (gameRunning) {
         if (userInputNumber <= 3) {
           if (!move(userInputNumber)) {
             console.log("\nYou can't go there!");
+          } else if (userInputNumber === 3) {
+            console.log("\nA monster appears!");
+            if (!handleCombat()) {
+              currentLocation = "village";
+            }
           }
         } else if (userInputNumber === 4) {
           // Show status
@@ -231,20 +266,5 @@ while (gameRunning) {
   if (playerHealth <= 0) {
     console.log("\nGame Over! Your health reached 0!");
     gameRunning = false;
-  }
-
-  function checkInventory() {
-    for (let slot = 0; slot < 3; slot++) {
-      console.log("Checking item slot " + slot + "...");
-      if (slot === 1 && hasWeapon) {
-        console.log("Found: Sword");
-      } else if (slot === 2 && hasPotion) {
-        console.log("Found: Health Potion");
-      } else if (slot === 3 && hasArmor) {
-        console.log("Found: Shield");
-      } else {
-        console.log("Empty slot");
-      }
-    }
   }
 }
