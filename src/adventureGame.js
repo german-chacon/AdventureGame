@@ -15,6 +15,23 @@ let weaponDamage = 0; // Will increase to 10 when player gets a sword
 let monsterDefense = 5; // Monster's defense value
 let healingPotionValue = 30; // Health will be restored by this amount
 
+// Create objects
+const potion = {
+  name: "Health Potion",
+  type: "potion",
+  value: 5,
+  effect: 30,
+  description: "This potion restores 30 healt points",
+};
+
+const sword = {
+  name: "sword",
+  type: "weapon",
+  value: 10,
+  effect: 10,
+  description: "The sword damages 10 points",
+};
+
 // Display the game title
 console.log("Welcome to the Adventure Game");
 console.log("=============================");
@@ -89,7 +106,7 @@ function showLocation() {
       "The heat from the forge fills the air. Weapons and armor line the walls."
     );
     console.log("\nWhat would you like to do?");
-    console.log("1: Buy sword (10 gold)");
+    console.log(`1: Buy sword (${sword.value} gold)`);
     console.log("2: Return to village");
     console.log("3: Check status");
     console.log("4: Use item");
@@ -100,7 +117,7 @@ function showLocation() {
       "Merchants sell their wares from colorful stalls. A potion seller catches your eye."
     );
     console.log("\nWhat would you like to do?");
-    console.log("1: Buy potion (5 gold)");
+    console.log(`1: Buy potion (${potion.value} gold)`);
     console.log("2: Return to village");
     console.log("3: Check status");
     console.log("4: Use item");
@@ -120,7 +137,7 @@ function showLocation() {
 }
 
 /**
- * Checks and displays inventory
+ * Displays the player's inventory
  */
 function checkInventory() {
   console.log("\n=== INVENTORY ===");
@@ -129,15 +146,10 @@ function checkInventory() {
     return;
   }
 
-  if (inventory.includes("sword")) {
-    console.log("- Sword");
-  }
-  if (inventory.includes("potion")) {
-    console.log("- Potion");
-  }
-  if (inventory.includes("armor")) {
-    console.log("- Armor");
-  }
+  // Display all inventory items with numbers and descriptions
+  inventory.forEach((item, index) => {
+    console.log(index + 1 + ". " + item.name + " - " + item.description);
+  });
 }
 
 /**
@@ -145,6 +157,13 @@ function checkInventory() {
  */
 
 function showHelp() {}
+
+/**
+ * Funciton that check the items in the inventory
+ */
+function hasItemType(type) {
+  return inventory.some((item) => item.type === type);
+}
 
 /**
  * ---- GAME PLAY FUNCTIONS ----
@@ -205,8 +224,12 @@ function move(choiceNum) {
  * @returns {boolean} True if combat was successful, false if retreat
  */
 function handleCombat() {
-  if (inventory.includes("sword")) {
-    console.log("You have a sword! You attack!");
+  // Updated to check for item type instead of specific string
+  if (hasItemType("weapon")) {
+    // Find the weapon to get its properties
+    let weapon = inventory.find((item) => item.type === "weapon");
+    console.log("You attack with your " + weapon.name + "!");
+    console.log("You deal " + weapon.effect + " damage!");
     console.log("Victory! You found 10 gold!");
     playerGold += 10;
     return true;
@@ -248,14 +271,36 @@ function updateHealth(amount) {
  * @returns {boolean} true if item was used successfully, false if not
  */
 function useItem() {
-  if (inventory.includes("potion")) {
-    console.log("You drink the healing potion.");
-    updateHealth(30);
-    let potionIndex = inventory.indexOf("potion");
-    inventory.splice(potionIndex, 1);
-    return true;
+  if (inventory.length === 0) {
+    console.log("\nYou have no items!");
+    return false;
   }
-  console.log("You don't have any usable items!");
+
+  console.log("\n=== Inventory ===");
+  inventory.forEach((item, index) => {
+    console.log(index + 1 + ". " + item.name);
+  });
+
+  let choice = readlineSync.question("Use which item? (number or 'cancel'): ");
+  if (choice === "cancel") return false;
+
+  let index = parseInt(choice) - 1;
+  if (index >= 0 && index < inventory.length) {
+    let item = inventory[index];
+
+    if (item.type === "potion") {
+      console.log("\nYou drink the " + item.name + ".");
+      updateHealth(item.effect);
+      inventory.splice(index, 1);
+      console.log("Health restored to: " + playerHealth);
+      return true;
+    } else if (item.type === "weapon") {
+      console.log("\nYou ready your " + item.name + " for battle.");
+      return true;
+    }
+  } else {
+    console.log("\nInvalid item number!");
+  }
   return false;
 }
 
@@ -270,11 +315,11 @@ function useItem() {
 function buyFromBlacksmith() {
   if (inventory.includes("sword")) {
     console.log("\nBlacksmith: 'You already have a sword!'");
-  } else if (playerGold >= 10) {
+  } else if (playerGold >= sword.value) {
     console.log("\nBlacksmith: 'A fine blade for a brave adventurer!'");
-    playerGold -= 10;
-    inventory.push("sword");
-    console.log("You bought a sword for 10 gold!");
+    playerGold -= sword.value;
+    inventory.push({ ...sword });
+    console.log(`You bought a ${sword.name} for ${sword.value} gold!`);
     console.log("Gold remaining: " + playerGold);
   } else {
     console.log("\nBlacksmith: 'Come back when you have more gold!'");
@@ -287,11 +332,11 @@ function buyFromBlacksmith() {
 function buyFromMarket() {
   if (inventory.includes("potion")) {
     console.log("Merchant: 'You already have a potion!'");
-  } else if (playerGold >= 5) {
+  } else if (playerGold >= potion.value) {
     console.log("\nMerchant: 'This potion will heal your wounds!'");
-    playerGold -= 5;
-    inventory.push("potion");
-    console.log("You bought a health potion for 5 gold!");
+    playerGold -= potion.value;
+    inventory.push({ ...potion });
+    console.log(`You bought a ${potion.name} for ${potion.value} gold!`);
     console.log("Gold remaining: " + playerGold);
   } else {
     console.log("\nMerchant: 'No gold, no potion!'");
